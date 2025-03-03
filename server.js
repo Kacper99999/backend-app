@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const User = require('./models/User');
+const cors = require('cors')
 const app = express();
 
 const PORT = process.env.PORT || 5000;
@@ -15,6 +16,8 @@ mongoose.connect('mongodb://localhost:27017/myapp', {
 .catch((err) => {
     console.log('Bład połaczenia z MongoDB!', err)
 })
+
+app.use(cors());
 
 app.use(express.json());
 
@@ -36,15 +39,16 @@ app.get('/api/users',async(req, res) => {
 });
 
 app.post('/api/users', async (req, res) => {
-    const {name, email} = req.body;
+    const {userName, email, password} = req.body;
 
-    if(!name || !email){
+    if(!userName || !email || !password){
         return res.status(400).json({message:'Name and email is required'});
     }
 
     const newUser = new User ({
-        name,
-        email
+        userName,
+        email,
+        password
     });
 
     try{
@@ -64,16 +68,16 @@ app.post('/api/users', async (req, res) => {
 
 app.put('/api/users/:id', async (req, res) => {
     const { id } = req.params;
-    const { name, email } = req.body;
+    const { name, email, password } = req.body;
 
-    if(!name || !email){
-        res.status(400).json({message:"Name and email is requiered"});
+    if(!name || !email || password){
+        res.status(400).json({message:"Name, email and password is requiered"});
     }
 
     try{
         const updatedUser = await User.findByIdAndUpdate(
             id,
-            { name, email },
+            { name, email, password },
             { new: true }
         );
 
